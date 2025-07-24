@@ -10,39 +10,39 @@
 
 struct Task {
     int id;
-    std::string title;
-    bool completed;
+    std::string description;
+    std::string status;
 };
 
 class TaskStore {
 
 private:
 
-    std::unordered_map<int, Task> tasks_;
-    std::mutex mutex_;
-    int nextId_ = 1;
-    std::function<void()> onChange_;
+    std::unordered_map<int, Task> _tasks;
+    std::mutex _mutex;
+    int _nextId = 1;
+    std::function<void()> _onChange;
 
 public:
 
     Task addTask(
-        const std::string& title
+        const std::string& description
     ) {
-        std::lock_guard lock(mutex_);
-        Task task{nextId_++, title, false};
-        tasks_[task.id] = task;
-        if (onChange_) onChange_();
+        std::lock_guard lock(_mutex);
+        Task task{_nextId++, description, "Pending"};
+        _tasks[task.id] = task;
+        if (_onChange) _onChange();
         return task;
     }
 
     bool deleteTask(
         int id
     ) {
-        std::lock_guard lock(mutex_);
-        auto it = tasks_.find(id);
-        if (it != tasks_.end()) {
-            tasks_.erase(it);
-            if (onChange_) onChange_();
+        std::lock_guard lock(_mutex);
+        auto it = _tasks.find(id);
+        if (it != _tasks.end()) {
+            _tasks.erase(it);
+            if (_onChange) _onChange();
             return true;
         }
         return false;
@@ -50,25 +50,25 @@ public:
 
     bool updateTask(
         int id,
-        const std::string& title,
-        bool completed
+        const std::string& description,
+        const std::string& status
     ) {
-        std::lock_guard lock(mutex_);
-        auto it = tasks_.find(id);
-        if (it != tasks_.end()) {
-            it->second.title = title;
-            it->second.completed = completed;
-            if (onChange_) onChange_();
+        std::lock_guard lock(_mutex);
+        auto it = _tasks.find(id);
+        if (it != _tasks.end()) {
+            it->second.description = description;
+            it->second.status = status;
+            if (_onChange) _onChange();
             return true;
         }
         return false;
     }
 
     std::vector<Task> getAllTasks() {
-        std::lock_guard lock(mutex_);
+        std::lock_guard lock(_mutex);
         std::vector<Task> allTasks;
-        allTasks.reserve(tasks_.size());
-        for (const auto& [id, task] : tasks_) {
+        allTasks.reserve(_tasks.size());
+        for (const auto& [id, task] : _tasks) {
             allTasks.push_back(task);
         }
         return allTasks;
@@ -77,16 +77,16 @@ public:
     std::optional<Task> getTask(
         int id
     ) {
-        std::lock_guard lock(mutex_);
-        auto it = tasks_.find(id);
-        if (it != tasks_.end()) {
+        std::lock_guard lock(_mutex);
+        auto it = _tasks.find(id);
+        if (it != _tasks.end()) {
             return it->second;
         }
         return std::nullopt;
     }
 
     void setOnChange(std::function<void()> callback) {
-        onChange_ = std::move(callback);
+        _onChange = std::move(callback);
     }
 
 };

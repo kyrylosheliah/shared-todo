@@ -15,6 +15,7 @@ private:
     static inline std::set<WebSocketConnectionPtr> _clients;
     static inline std::shared_ptr<TaskStore> _store = nullptr;
     static inline std::mutex _clientsMutex;
+    static inline int _version = 1;
 
 public:
 
@@ -26,17 +27,39 @@ public:
         std::shared_ptr<TaskStore> store
     ) {
         _store = store;
-        // Set_ up the callback for when the task store changs
         if (_store){
             _store->setOnChange([] {
-                TodoWebSocket::broadcastTasks();
+                TodoWebSocket::broadcastVersion();
             });
         }
     }
 
+    static void broadcastVersion() {
+        if (!_store) return;
+        Json::Value jsonVersionObject;
+        jsonVersionObject["version"] = _version;
+        Json::StreamWriterBuilder writer;
+        std::string message = Json::writeString(writer, jsonVersionObject);
+        std::lock_guard<std::mutex> lock(_clientsMutex);
+        for (const auto& conn : _clients) {
+            if (conn->connected()) {
+                conn->send(message);
+            }
+        }
+    }
+
+    static void bumpVersion() {
+        {
+            std::lock_guard<std::mutex> lock(_clientsMutex);
+            ++_version; // the overflow is intentional
+        }
+        TodoWebSocket::broadcastVersion();
+    }
+
     void handleNewMessage(
         const WebSocketConnectionPtr&,
-        std::string&&, const WebSocketMessageType&
+        std::string&&,
+        const WebSocketMessageType&
     ) override {}
 
     void handleNewConnection(
@@ -47,8 +70,7 @@ public:
             std::lock_guard<std::mutex> lock(_clientsMutex);
             _clients.insert(conn);
         }
-        // Send current task list immediately
-        TodoWebSocket::broadcastTasks();
+        TodoWebSocket::broadcastVersion();
     }
 
     void handleConnectionClosed(
@@ -56,27 +78,6 @@ public:
     ) {
         std::lock_guard<std::mutex> lock(_clientsMutex);
         _clients.erase(conn);
-    }
-
-    static void broadcastTasks(){
-        if (!_store) return;
-        auto tasks = _store->getAllTasks();
-        Json::Value jsonArray(Json::arrayValue);
-        for (const auto& task : tasks) {
-            Json::Value jsonTask;
-            jsonTask["id"] = task.id;
-            jsonTask["title"] = task.title;
-            jsonTask["completed"] = task.completed;
-            jsonArray.append(jsonTask);
-        }
-        Json::StreamWriterBuilder writer;
-        std::string message = Json::writeString(writer, jsonArray);
-        std::lock_guard<std::mutex> lock(_clientsMutex);
-        for (const auto& conn : _clients) {
-            if (conn->connected()) {
-                conn->send(message);
-            }
-        }
     }
 
 };

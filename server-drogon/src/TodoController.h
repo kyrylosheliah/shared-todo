@@ -40,8 +40,8 @@ protected:
         for (const auto& task : tasks) {
             Json::Value t;
             t["id"] = task.id;
-            t["title"] = task.title;
-            t["completed"] = task.completed;
+            t["description"] = task.description;
+            t["status"] = task.status;
             jsonResponse.append(t);
         }
         auto resp = HttpResponse::newHttpJsonResponse(jsonResponse);
@@ -53,19 +53,19 @@ protected:
         std::function<void(const HttpResponsePtr &)> &&callback
     ) {
         auto json = req->getJsonObject();
-        if (!json || !(*json).isMember("title") || !(*json)["title"].isString()) {
+        if (!json || !(*json).isMember("description") || !(*json)["description"].isString()) {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(k400BadRequest);
-            resp->setBody("Missing or invalid 'title'");
+            resp->setBody("Missing or invalid 'description'");
             callback(resp);
             return;
         }
-        std::string title = (*json)["title"].asString();
-        Task newTask = _store->addTask(title);
+        std::string description = (*json)["description"].asString();
+        Task newTask = _store->addTask(description);
         Json::Value jsonResponse;
         jsonResponse["id"] = newTask.id;
-        jsonResponse["title"] = newTask.title;
-        jsonResponse["completed"] = newTask.completed;
+        jsonResponse["description"] = newTask.description;
+        jsonResponse["status"] = newTask.status;
         auto resp = HttpResponse::newHttpJsonResponse(jsonResponse);
         callback(resp);
     }
@@ -76,23 +76,23 @@ protected:
         int id
     ) {
         auto json = req->getJsonObject();
-        if (!json || !(*json).isMember("title") || !(*json).isMember("completed")) {
+        if (!json || !(*json).isMember("description") || !(*json).isMember("status")) {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(k400BadRequest);
-            resp->setBody("Missing 'title' or 'completed'");
+            resp->setBody("Missing 'description' or 'status'");
             callback(resp);
             return;
         }
-        const auto& title = (*json)["title"];
-        const auto& completed = (*json)["completed"];
-        if (!title.isString() || !completed.isBool()) {
+        const auto& description = (*json)["description"];
+        const auto& status = (*json)["status"];
+        if (!description.isString() || !status.isString()) {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(k400BadRequest);
-            resp->setBody("Invalid 'title' or 'completed' types");
+            resp->setBody("Invalid 'description' or 'status' types");
             callback(resp);
             return;
         }
-        bool success = _store->updateTask(id, title.asString(), completed.asBool());
+        bool success = _store->updateTask(id, description.asString(), status.asString());
         if (!success) {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(k404NotFound);
@@ -103,8 +103,8 @@ protected:
         auto updatedTask = _store->getTask(id);
         Json::Value jsonResponse;
         jsonResponse["id"] = updatedTask->id;
-        jsonResponse["title"] = updatedTask->title;
-        jsonResponse["completed"] = updatedTask->completed;
+        jsonResponse["description"] = updatedTask->description;
+        jsonResponse["status"] = updatedTask->status;
         auto resp = HttpResponse::newHttpJsonResponse(jsonResponse);
         callback(resp);
     }

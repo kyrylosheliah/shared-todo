@@ -8,14 +8,13 @@ int main() {
 
     TodoWebSocket::setTaskStore(store);
     store->setOnChange([] {
-        TodoWebSocket::broadcastTasks();
+        TodoWebSocket::bumpVersion();
     });
 
     auto controller = std::make_shared<TodoController>();
     controller->setTaskStore(store);
 
     drogon::app()
-        .registerController(store)
         .addListener("0.0.0.0", 5000)
         .run();
 }

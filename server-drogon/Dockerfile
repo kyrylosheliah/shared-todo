@@ -11,4 +11,4 @@ RUN cmake ../ && make
 
 EXPOSE 5000 5000
 
-ENTRYPOINT [ "./todo-server" ]
+ENTRYPOINT [ "./todo-server-drogon" ]
