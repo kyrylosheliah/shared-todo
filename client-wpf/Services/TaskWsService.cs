@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 
@@ -7,22 +8,25 @@ public class TaskWsService
 {
     private ClientWebSocket _webSocket = new();
     private CancellationTokenSource _cts = new();
+    static readonly string _baseUrl = "ws://localhost:5000/ws/tasks";
 
-    public event Action<string> OnMessageReceived = s => { };
+    public List<Action<string>> OnMessageReceived = [];
 
-    public async Task ConnectAsync(string uri)
+    public async Task ConnectAsync()
     {
         _webSocket = new ClientWebSocket();
         _cts = new CancellationTokenSource();
 
         try
         {
-            await _webSocket.ConnectAsync(new Uri(uri), _cts.Token);
-            _ = ReceiveLoopAsync();
+            await _webSocket.ConnectAsync(new Uri(_baseUrl), _cts.Token);
+            Debug.WriteLine($"WebSocket start");
+            await ReceiveLoopAsync();
+            Debug.WriteLine($"WebSocket end");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"WebSocket connection failed: {ex.Message}");
+            Debug.WriteLine($"WebSocket connection failed: {ex.Message}");
         }
     }
 
@@ -41,6 +45,7 @@ public class TaskWsService
         var buffer = new byte[4096];
         while (!_cts.IsCancellationRequested)
         {
+            Debug.WriteLine("receiving socket message");
             WebSocketReceiveResult result;
             var message = new StringBuilder();
             do
@@ -54,7 +59,9 @@ public class TaskWsService
                 var chunk = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 message.Append(chunk);
             } while (!result.EndOfMessage);
-            OnMessageReceived?.Invoke(message.ToString());
+            var m = message.ToString();
+            foreach (var e in OnMessageReceived)
+                e(m);
         }
     }
 }

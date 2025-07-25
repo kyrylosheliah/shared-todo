@@ -25,6 +25,7 @@ curl http://127.0.0.1:5000/api/tasks
 
 ## Development
 
+Server
 ```
 sudo docker run -it -p 5000:5000 -v <project_dir>/shared-todo/server-drogon:/app -w /app drogonframework/drogon bash
 mkdir build && cd build

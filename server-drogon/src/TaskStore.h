@@ -1,12 +1,13 @@
 #pragma once
 
+#include <drogon/drogon.h>
 #include <vector>
 #include <mutex>
 #include <unordered_map>
 #include <string>
 #include <functional>
 #include <algorithm>
-#include "TaskStore.h"
+#include "TodoWebSocket.h"
 
 struct Task {
     int id;
@@ -25,68 +26,16 @@ private:
 
 public:
 
-    Task addTask(
-        const std::string& description
-    ) {
-        std::lock_guard lock(_mutex);
-        Task task{_nextId++, description, "Pending"};
-        _tasks[task.id] = task;
-        if (_onChange) _onChange();
-        return task;
-    }
+    void setOnChange(std::function<void()> callback);
 
-    bool deleteTask(
-        int id
-    ) {
-        std::lock_guard lock(_mutex);
-        auto it = _tasks.find(id);
-        if (it != _tasks.end()) {
-            _tasks.erase(it);
-            if (_onChange) _onChange();
-            return true;
-        }
-        return false;
-    }
+    Task addTask(const std::string& description);
 
-    bool updateTask(
-        int id,
-        const std::string& description,
-        const std::string& status
-    ) {
-        std::lock_guard lock(_mutex);
-        auto it = _tasks.find(id);
-        if (it != _tasks.end()) {
-            it->second.description = description;
-            it->second.status = status;
-            if (_onChange) _onChange();
-            return true;
-        }
-        return false;
-    }
+    bool deleteTask(int id);
 
-    std::vector<Task> getAllTasks() {
-        std::lock_guard lock(_mutex);
-        std::vector<Task> allTasks;
-        allTasks.reserve(_tasks.size());
-        for (const auto& [id, task] : _tasks) {
-            allTasks.push_back(task);
-        }
-        return allTasks;
-    }
+    bool updateTask(int id, const std::string& description, const std::string& status);
 
-    std::optional<Task> getTask(
-        int id
-    ) {
-        std::lock_guard lock(_mutex);
-        auto it = _tasks.find(id);
-        if (it != _tasks.end()) {
-            return it->second;
-        }
-        return std::nullopt;
-    }
+    std::vector<Task> getAllTasks();
 
-    void setOnChange(std::function<void()> callback) {
-        _onChange = std::move(callback);
-    }
+    std::optional<Task> getTask(int id);
 
 };

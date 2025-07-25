@@ -21,8 +21,8 @@ public partial class MainWindow : Window
     {
         _crud = crud;
         _ws = ws;
-        _ws.OnMessageReceived += TryUpdateOnSocketVersion;
-        Task.Run(() => _ws.ConnectAsync($"{_baseUrl}/ws/tasks"));
+        _ws.OnMessageReceived.Add(TryUpdateOnSocketVersion);
+        Task.Run(() => _ws.ConnectAsync());
         InitializeComponent();
         TodoList.ItemsSource = _tasks;
         LoadTasks();
