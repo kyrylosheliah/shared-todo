@@ -3,7 +3,6 @@
 #include <drogon/drogon.h>
 #include <memory>
 
-// Forward declaration only — don't include TaskStore.h here!
 class TaskStore;
 
 class TaskStorePlugin : public drogon::Plugin<TaskStorePlugin> {

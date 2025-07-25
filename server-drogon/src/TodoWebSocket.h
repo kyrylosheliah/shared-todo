@@ -7,7 +7,6 @@
 
 using namespace drogon;
 
-// Forward declaration to avoid circular dependency
 class TaskStorePlugin;
 
 class TodoWebSocket : public WebSocketController<TodoWebSocket> {

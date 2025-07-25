@@ -1,5 +1,9 @@
 # Shared To-do list app
 
+The data mechanism provides the REST endpoints for the frontend to query. The
+update mechanism provides the to-do list version web socket for the updates
+broadcast.
+
 ## Prerequisites
 
 - Docker
