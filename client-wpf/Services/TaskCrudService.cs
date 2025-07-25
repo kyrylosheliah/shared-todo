@@ -1,42 +1,56 @@
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 using TodoClientWpf.Models;
+using static System.Net.WebRequestMethods;
 
 namespace TodoClientWpf.Services;
 
-public class TaskCrudService
-{
-    private readonly HttpClient _httpClient;
-    private const string _baseUrl = "http://localhost:5000";
+public class TaskCrudService {
+    
+    static readonly string _baseUrl = "http://localhost:5000";
+    private readonly HttpClient _http;
 
-    public TaskCrudService()
+    public TaskCrudService(HttpClient http, TaskWsService ws)
     {
-        _httpClient = new HttpClient();
+        _http = http;
+        _http.BaseAddress = new Uri(_baseUrl);
     }
 
     public async Task<List<TaskDto>> GetTasksAsync()
     {
-        var res = await _httpClient.GetAsync($"{_baseUrl}/api/tasks");
+        var res = await _http.GetAsync("/api/tasks");
         if (!res.IsSuccessStatusCode) return [];
         var tasks = await res.Content.ReadFromJsonAsync<List<TaskDto>>();
-        return tasks ?? [];
+        if (tasks == null) return [];
+        foreach (var item in tasks)
+        {
+            item.IsCompleted = item.Status.ToLower() == "completed";
+            tasks.Add(item);
+        }
+        return tasks;
     }
 
-    public async Task<bool> AddTaskAsync(TaskDto task)
+    public async Task<TaskDto?> AddTaskAsync(string description)
     {
-        var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/task", task);
-        return response.IsSuccessStatusCode;
+        var response = await _http.PostAsJsonAsync("/api/task", new { description });
+        if (!response.IsSuccessStatusCode) return null;
+        var newTask = await response.Content.ReadFromJsonAsync<TaskDto>();
+        return newTask;
     }
 
-    public async Task<bool> UpdateTaskAsync(TaskDto task)
+    public async Task<string?> UpdateTaskAsync(TaskDto task)
     {
-        var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/api/task/{task.Id}", task);
-        return response.IsSuccessStatusCode;
+        var response = await _http.PutAsJsonAsync($"/api/task", task);
+        if (!response.IsSuccessStatusCode) return response.Content.ToString();
+        return null;
     }
 
-    public async Task<bool> DeleteTaskAsync(int id)
+    public async Task<string?> DeleteTaskAsync(int id)
     {
-        var response = await _httpClient.DeleteAsync($"{_baseUrl}/api/task/{id}");
-        return response.IsSuccessStatusCode;
+        var response = await _http.DeleteAsync($"/api/task/{id}");
+        if (!response.IsSuccessStatusCode) return response.Content.ToString();
+        return null;
     }
 }

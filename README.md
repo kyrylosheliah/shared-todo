@@ -3,11 +3,18 @@
 ## Prerequisites
 
 - Docker
-- .NET SDK 9.0+
+- .NET SDK 9.0
 
 ## Run
 
-Build the docker image for the server
+Run the WPF form app
+```
+cd client-wpf
+dotnet restore
+dotnet run
+```
+
+Run the docker image for the server
 ```
 cd server-drogon
 sudo docker build -t todo-server-drogon .
