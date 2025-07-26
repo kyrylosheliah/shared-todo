@@ -1,12 +1,12 @@
-#include "TaskStore.h"
-#include "TodoWebSocket.h"
+#include "TaskStoreService.h"
+#include "../controllers/TodoWebSocketController.h"
 #include <drogon/drogon.h>
 
-void TaskStore::setOnChange(std::function<void()> callback) {
+void TaskStoreService::setOnChange(std::function<void()> callback) {
     _onChange = std::move(callback);
 }
 
-Task TaskStore::addTask(const std::string& description) {
+Task TaskStoreService::addTask(const std::string& description) {
     std::lock_guard lock(_mutex);
     Task task{_nextId++, description, "Pending"};
     _tasks[task.id] = task;
@@ -14,7 +14,7 @@ Task TaskStore::addTask(const std::string& description) {
     return task;
 }
 
-bool TaskStore::deleteTask(int id) {
+bool TaskStoreService::deleteTask(int id) {
     std::lock_guard lock(_mutex);
     auto it = _tasks.find(id);
     if (it != _tasks.end()) {
@@ -25,7 +25,7 @@ bool TaskStore::deleteTask(int id) {
     return false;
 }
 
-bool TaskStore::updateTask(int id, const std::string& description, const std::string& status) {
+bool TaskStoreService::updateTask(int id, const std::string& description, const std::string& status) {
     std::lock_guard lock(_mutex);
     auto it = _tasks.find(id);
     if (it != _tasks.end()) {
@@ -37,7 +37,7 @@ bool TaskStore::updateTask(int id, const std::string& description, const std::st
     return false;
 }
 
-std::vector<Task> TaskStore::getAllTasks() {
+std::vector<Task> TaskStoreService::getAllTasks() {
     std::lock_guard lock(_mutex);
     std::vector<Task> allTasks;
     allTasks.reserve(_tasks.size());
@@ -47,7 +47,7 @@ std::vector<Task> TaskStore::getAllTasks() {
     return allTasks;
 }
 
-std::optional<Task> TaskStore::getTask(int id) {
+std::optional<Task> TaskStoreService::getTask(int id) {
     std::lock_guard lock(_mutex);
     auto it = _tasks.find(id);
     if (it != _tasks.end()) {

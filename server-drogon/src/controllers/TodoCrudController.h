@@ -4,16 +4,16 @@
 
 using namespace drogon;
 
-class TodoController : public HttpController<TodoController> {
+class TodoCrudController : public HttpController<TodoCrudController> {
 public:
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(TodoController::getTasks, "/api/tasks", Get);
-        ADD_METHOD_TO(TodoController::addTask, "/api/task", Post);
-        ADD_METHOD_TO(TodoController::updateTask, "/api/task", Put);
-        ADD_METHOD_TO(TodoController::deleteTask, "/api/task/{1}", Delete);
+        ADD_METHOD_TO(TodoCrudController::getTasks, "/api/tasks", Get);
+        ADD_METHOD_TO(TodoCrudController::addTask, "/api/task", Post);
+        ADD_METHOD_TO(TodoCrudController::updateTask, "/api/task", Put);
+        ADD_METHOD_TO(TodoCrudController::deleteTask, "/api/task/{1}", Delete);
     METHOD_LIST_END
 
-    TodoController() = default;
+    TodoCrudController() = default;
 
 protected:
     void getTasks(

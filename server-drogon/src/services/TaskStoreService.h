@@ -7,7 +7,7 @@
 #include <string>
 #include <functional>
 #include <algorithm>
-#include "TodoWebSocket.h"
+#include "../controllers/TodoWebSocketController.h"
 
 struct Task {
     int id;
@@ -15,7 +15,7 @@ struct Task {
     std::string status;
 };
 
-class TaskStore {
+class TaskStoreService {
 
 private:
 

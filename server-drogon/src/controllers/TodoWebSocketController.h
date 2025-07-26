@@ -3,13 +3,10 @@
 #include <set>
 #include <mutex>
 #include <drogon/WebSocketController.h>
-#include "TaskStore.h"
 
 using namespace drogon;
 
-class TaskStorePlugin;
-
-class TodoWebSocket : public WebSocketController<TodoWebSocket> {
+class TodoWebSocketController : public WebSocketController<TodoWebSocketController> {
 private:
     static inline std::set<WebSocketConnectionPtr> _clients;
     static inline std::mutex _clientsMutex;
@@ -20,7 +17,7 @@ public:
         WS_PATH_ADD("/ws/tasks");
     WS_PATH_LIST_END
 
-    TodoWebSocket();
+    TodoWebSocketController();
 
     static void broadcastVersion();
 

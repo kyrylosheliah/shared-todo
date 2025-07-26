@@ -9,7 +9,11 @@ The update mechanism provides the to-do list version number updates via a web
 socket broadcast.
 Using a web socket enables the clients to be notified when a change is made
 in the list. This way, they are able to perform reactive updates, but are
-still free to interpret the interval for them on their own.
+still free to implement the interval logic for them on their own.
+
+The client frontend WPF app leverages async execution, observables and
+property signals to automatically update the task list and show the visual
+countdown for tasks deletion with a background progress bar.
 
 ## Prerequisites
 

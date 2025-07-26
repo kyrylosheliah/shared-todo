@@ -89,7 +89,7 @@ public partial class MainWindow : Window
                 {
                     existing.Description = refetched.Description;
                     existing.Status = refetched.Status;
-                    existing.IsCompleted = refetched.Status.Equals("completed", StringComparison.CurrentCultureIgnoreCase);
+                    existing.IsCompleted = refetched.Status != null && refetched.Status.Equals("completed", StringComparison.CurrentCultureIgnoreCase);
                 }
                 else
                 {

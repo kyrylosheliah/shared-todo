@@ -1,17 +1,16 @@
-#include "TodoWebSocket.h"
+#include "TodoWebSocketController.h"
 #include <drogon/drogon.h>
 #include <json/json.h>
 
 using namespace drogon;
 
-TodoWebSocket::TodoWebSocket() {}
+TodoWebSocketController::TodoWebSocketController() {}
 
-void TodoWebSocket::broadcastVersion() {
+void TodoWebSocketController::broadcastVersion() {
     LOG_DEBUG << "[?] Broadcasting the version";
 
     Json::Value jsonVersionObject;
     jsonVersionObject["version"] = _version;
-        //app().getPlugin<TaskStorePlugin>()->getStore()->getVersion();
     Json::StreamWriterBuilder writer;
     std::string message = Json::writeString(writer, jsonVersionObject);
 
@@ -24,19 +23,19 @@ void TodoWebSocket::broadcastVersion() {
     }
 }
 
-void TodoWebSocket::bumpVersion() {
+void TodoWebSocketController::bumpVersion() {
     LOG_DEBUG << "[?] Bumping the version";
     ++_version; // the overflow is intentional
-    TodoWebSocket::broadcastVersion();
+    TodoWebSocketController::broadcastVersion();
 }
 
-void TodoWebSocket::handleNewMessage(
+void TodoWebSocketController::handleNewMessage(
     const WebSocketConnectionPtr &,
     std::string &&,
     const WebSocketMessageType &
 ) { }
 
-void TodoWebSocket::handleNewConnection(
+void TodoWebSocketController::handleNewConnection(
     const HttpRequestPtr &req,
     const WebSocketConnectionPtr &conn
 ) {
@@ -47,7 +46,7 @@ void TodoWebSocket::handleNewConnection(
     }
 }
 
-void TodoWebSocket::handleConnectionClosed(
+void TodoWebSocketController::handleConnectionClosed(
     const WebSocketConnectionPtr &conn
 ) {
     LOG_DEBUG << "[?] A web socket connection has closed";

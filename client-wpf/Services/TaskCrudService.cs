@@ -22,7 +22,7 @@ public class TaskCrudService {
         var tasks = await res.Content.ReadFromJsonAsync<List<TaskDto>>();
         if (tasks == null) return [];
         foreach (var item in tasks)
-            item.IsCompleted = item.Status.ToLower() == "completed";
+            item.IsCompleted = item.Status != null && item.Status.ToLower() == "completed";
         return tasks;
     }
 

@@ -7,14 +7,14 @@ find_package(Drogon CONFIG REQUIRED)
 
 add_executable(todo-server-drogon
     src/main.cpp
-    src/TodoController.h
-    src/TodoController.cpp
-    src/TodoWebSocket.h
-    src/TodoWebSocket.cpp
-    src/TaskStore.h
-    src/TaskStore.cpp
-    src/TaskStorePlugin.h
-    src/TaskStorePlugin.cpp
+    src/controllers/TodoCrudController.h
+    src/controllers/TodoCrudController.cpp
+    src/controllers/TodoWebSocketController.h
+    src/controllers/TodoWebSocketController.cpp
+    src/services/TaskStoreService.h
+    src/services/TaskStoreService.cpp
+    src/plugins/TaskStorePlugin.h
+    src/plugins/TaskStorePlugin.cpp
 )
 
 target_link_libraries(todo-server-drogon PRIVATE Drogon::Drogon)

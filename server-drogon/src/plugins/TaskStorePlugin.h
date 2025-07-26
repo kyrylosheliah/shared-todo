@@ -3,11 +3,11 @@
 #include <drogon/drogon.h>
 #include <memory>
 
-class TaskStore;
+class TaskStoreService;
 
 class TaskStorePlugin : public drogon::Plugin<TaskStorePlugin> {
 private:
-    std::shared_ptr<TaskStore> _store;
+    std::shared_ptr<TaskStoreService> _store;
 
 public:
     TaskStorePlugin();
@@ -16,5 +16,5 @@ public:
 
     void shutdown() override;
 
-    std::shared_ptr<TaskStore> getStore();
+    std::shared_ptr<TaskStoreService> getStore();
 };

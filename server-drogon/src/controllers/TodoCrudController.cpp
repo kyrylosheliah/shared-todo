@@ -1,10 +1,10 @@
-#include "TodoController.h"
-#include "TaskStore.h"
-#include "TaskStorePlugin.h"
+#include "TodoCrudController.h"
+#include "../services/TaskStoreService.h"
+#include "../plugins/TaskStorePlugin.h"
 #include <json/json.h>
 #include <sstream>
 
-void TodoController::getTasks(
+void TodoCrudController::getTasks(
     const HttpRequestPtr &req,
     std::function<void(const HttpResponsePtr &)> &&callback
 ) {
@@ -21,7 +21,7 @@ void TodoController::getTasks(
     callback(resp);
 }
 
-void TodoController::addTask(
+void TodoCrudController::addTask(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr &)> &&callback
 ) {
@@ -43,7 +43,7 @@ void TodoController::addTask(
     callback(resp);
 }
 
-void TodoController::updateTask(
+void TodoCrudController::updateTask(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr &)> &&callback
 ) {
@@ -111,7 +111,7 @@ void TodoController::updateTask(
     callback(resp);
 }
 
-void TodoController::deleteTask(
+void TodoCrudController::deleteTask(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr &)> &&callback,
     const std::string &idPathParam

@@ -1,5 +1,5 @@
 #include <drogon/drogon.h>
-#include "TaskStorePlugin.h"
+#include "plugins/TaskStorePlugin.h"
 
 int main() {
     drogon::app()
