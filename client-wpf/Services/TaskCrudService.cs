@@ -9,7 +9,7 @@ public class TaskCrudService {
     static readonly string _baseUrl = "http://localhost:5000";
     private readonly HttpClient _http;
 
-    public TaskCrudService(HttpClient http, TaskWsService ws)
+    public TaskCrudService(HttpClient http)
     {
         _http = http;
         _http.BaseAddress = new Uri(_baseUrl);
@@ -30,8 +30,15 @@ public class TaskCrudService {
     {
         var response = await _http.PostAsJsonAsync("/api/task", new { description });
         if (!response.IsSuccessStatusCode) return null;
-        var newTask = await response.Content.ReadFromJsonAsync<TaskDto>();
-        return newTask;
+        try
+        {
+            var newTask = await response.Content.ReadFromJsonAsync<TaskDto>();
+            return newTask;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public async Task<string?> UpdateTaskAsync(TaskDto task)

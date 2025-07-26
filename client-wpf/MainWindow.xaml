@@ -4,38 +4,112 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TodoClientWpf"
+        xmlns:converters="clr-namespace:TodoClientWpf.Converters"
         mc:Ignorable="d"
-        Title="To-do list" Height="450" Width="800">
-    <StackPanel Margin="10">
-        <!-- New to-do item input -->
-        <GroupBox Header="Add">
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10">
-                <TextBox x:Name="TitleInput" Width="280" Height="30" Margin="0 0 10 0" VerticalContentAlignment="Center" />
-                <Button Width="30" Height="30" Click="AddTask_Click">
-                    <Viewbox>
-                        <Path Data="M8,0 L8,8 L0,8 L0,10 L8,10 L8,18 L10,18 L10,10 L18,10 L18,8 L10,8 L10,0 Z"
-                          Fill="Black"/>
-                    </Viewbox>
+        Title="To-do list" MinHeight="300" MinWidth="500"
+        SizeToContent="WidthAndHeight">
+    <Window.Resources>
+        <converters:BoolToHiddenVisibilityConverter x:Key="BoolToHiddenVisibilityConverter" />
+    </Window.Resources>
+    <Grid VerticalAlignment="Stretch" Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <!-- New to-do item description input -->
+        <GroupBox Grid.Row="0" Header="Add a task with the description:" Margin="0 0 0 10">
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="TitleInput" Height="30" Margin="10" VerticalContentAlignment="Center" />
+                <Button Name="plusButton" Grid.Column="1" Margin="0 10 10 10" Width="30" Height="30" Click="AddTask_Click"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                        Padding="0">
+                    <TextBlock Text="+" FontSize="30" Margin="0 -9 0 0" />
+                    <Button.Style>
+                        <Style TargetType="Button" >
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=TitleInput}" Value="">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Text, ElementName=TitleInput}" Value="{x:Null}">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                                <Trigger Property="IsEnabled" Value="False" />
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
-            </StackPanel>
+            </Grid>
         </GroupBox>
         <!-- The list of to-do items -->
-        <ScrollViewer Height="auto">
-            <ItemsControl x:Name="TodoList">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel Margin="0 5">
-                            <CheckBox IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Header -->
+                <RowDefinition Height="*"/>
+                <!-- Scrollable list -->
+            </Grid.RowDefinitions>
+
+            <!-- Headers Row -->
+            <Grid Grid.Row="0" Margin="0 0 0 5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="✓" FontWeight="DemiBold" />
+                <TextBlock Text="Description" Grid.Column="1" FontWeight="DemiBold"/>
+                <TextBlock Text="Status" Grid.Column="2" FontWeight="DemiBold"/>
+            </Grid>
+
+            <!-- To-do List Items -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="TodoList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <ProgressBar x:Name="DeletionProgressBar"
+                                     Minimum="0" Maximum="100"
+                                     Grid.ColumnSpan="3"
+                                     Height="30"
+                                     Value="{Binding CompletionProgress}"
+                                     Visibility="{Binding IsPendingDone, Converter={StaticResource BoolToHiddenVisibilityConverter}}"
+                                     VerticalAlignment="Top"
+                                     Margin="0,0,0,2"
+                                     Foreground="LightGray"
+                                     Background="Transparent"
+                                     BorderBrush="Transparent"/>
+
+                                <CheckBox Grid.Column="0"
+                                  IsChecked="{Binding IsCompleted, Mode=TwoWay}"
                                   Checked="TaskCheckBox_Changed"
                                   Unchecked="TaskCheckBox_Changed"
                                   Tag="{Binding Id}"
-                                  Margin="0 0 10 0" />
-                            <TextBlock Text="{Binding Description}" Width="200" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Status}" Foreground="Gray" VerticalAlignment="Center"/>
-                        </DockPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </StackPanel>
+                                  VerticalAlignment="Center" />
+
+                                <TextBlock Grid.Column="1"
+                                   Text="{Binding Description}"
+                                   VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Column="2"
+                                   Text="{Binding Status}"
+                                   Foreground="Gray"
+                                   VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
 </Window>
