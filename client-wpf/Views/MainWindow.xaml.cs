@@ -1,23 +1,27 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Interop;
+using TodoClientWpf.Helpers;
 using TodoClientWpf.Models;
 using TodoClientWpf.Services;
+using Wpf.Ui.Appearance;
 
-namespace TodoClientWpf;
+namespace TodoClientWpf.Views;
 
 public partial class MainWindow : Window
 {
     private readonly TaskCrudService _crud;
     private readonly TaskWsService _ws;
     private readonly ObservableCollection<TaskDto> _tasks = [];
+    private bool _empty = true;
     private int _version = 0;
     private Dictionary<TaskDto, CancellationTokenSource> _pendingTasks = [];
-    private readonly int debounceDurationMs = 3000;
-    private readonly int debounceIntervalMs = 30;
+    private readonly int debounceDurationMilliseconds = 5000;
+    private readonly int debounceUpdatesPerSecond = 60;
 
     public MainWindow(TaskCrudService crud, TaskWsService ws)
     {
@@ -96,28 +100,37 @@ public partial class MainWindow : Window
                     _tasks.Add(refetched);
                 }
             }
+            _empty = _tasks.Count == 0;
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Error loading tasks: " + ex.Message);
+            UiMessageBoxHelper.Show("Error loading tasks", ex.Message);
+        }
+    }
+    private void DescriptionInput_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && plusButton.IsEnabled)
+        {
+            AddTask_Click(plusButton, new RoutedEventArgs());
+            e.Handled = true;
         }
     }
 
     private async void AddTask_Click(object sender, RoutedEventArgs e)
     {
-        string title = TitleInput.Text.Trim();
+        string title = DescriptionInput.Text.Trim();
         if (string.IsNullOrEmpty(title)) return;
 
         try
         {
             var newTask = await _crud.AddTaskAsync(title);
             if (newTask == null) return;
-            TitleInput.Text = "";
-            MessageBox.Show($"New task created, id {newTask.Id}");
+            DescriptionInput.Text = "";
+            UiMessageBoxHelper.Show("New task created", $"id = {newTask.Id}");
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Error adding task: " + ex.Message);
+            UiMessageBoxHelper.Show("Error adding task", ex.Message);
         }
     }
 
@@ -138,10 +151,12 @@ public partial class MainWindow : Window
                     _pendingTasks[task] = cts;
                     try
                     {
-                        for (int i = 0; i <= debounceIntervalMs; i++)
+                        var debounceIntervals = debounceDurationMilliseconds / 1000 * debounceUpdatesPerSecond;
+                        var delay = debounceDurationMilliseconds / debounceIntervals;
+                        for (int i = 0; i <= debounceIntervals; ++i)
                         {
-                            task.CompletionProgress = 100 - i * 100.0 / debounceIntervalMs;
-                            await Task.Delay(debounceDurationMs / debounceIntervalMs, cts.Token);
+                            task.CompletionProgress = 10000 - i * 10000.0 / debounceIntervals;
+                            await Task.Delay(delay, cts.Token);
                         }
                         task.IsPendingDone = false;
                         _pendingTasks.Remove(task);
@@ -166,7 +181,7 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error updating task: " + ex.Message);
+                UiMessageBoxHelper.Show("Error updating task", ex.Message);
             }
         }
     }
