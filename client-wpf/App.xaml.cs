@@ -2,12 +2,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Win32;
 using System.Windows;
-using System.Windows.Interop;
 using TodoClientWpf.Helpers;
 using TodoClientWpf.Services;
 using TodoClientWpf.Views;
 using Wpf.Ui.Appearance;
-using Wpf.Ui.Markup;
 
 namespace TodoClientWpf;
 

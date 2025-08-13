@@ -4,11 +4,9 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using TodoClientWpf.Helpers;
 using TodoClientWpf.Models;
 using TodoClientWpf.Services;
-using Wpf.Ui.Appearance;
 
 namespace TodoClientWpf.Views;
 
@@ -27,8 +25,23 @@ public partial class MainWindow : Window
     {
         _crud = crud;
         _ws = ws;
-        _ws.OnMessageReceived.Add(TryUpdateOnSocketVersion);
-        Task.Run(() => _ws.ConnectAsync());
+        _ws.OnMessageReceived += TryUpdateOnSocketVersion;
+        Task.Run(async () =>
+        {
+            while (true)
+            {
+                try
+                {
+                    Dispatcher.Invoke(() => UiMessageBoxHelper.Show("Connecting", "..."));
+                    await _ws.ConnectAsync();
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.Invoke(() => UiMessageBoxHelper.Show("WebSocket connection failed: ", ex.Message));
+                }
+                await Task.Delay(1000);
+            }
+        });
         InitializeComponent();
         TodoList.ItemsSource = _tasks;
         LoadTasks();

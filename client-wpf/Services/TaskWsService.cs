@@ -10,24 +10,17 @@ public class TaskWsService
     private CancellationTokenSource _cts = new();
     static readonly string _baseUrl = "ws://localhost:5000/ws/tasks";
 
-    public List<Action<string>> OnMessageReceived = [];
+    public event Action<string> OnMessageReceived;
 
     public async Task ConnectAsync()
     {
         _webSocket = new ClientWebSocket();
         _cts = new CancellationTokenSource();
 
-        try
-        {
-            await _webSocket.ConnectAsync(new Uri(_baseUrl), _cts.Token);
-            Debug.WriteLine($"WebSocket start");
-            await ReceiveLoopAsync();
-            Debug.WriteLine($"WebSocket end");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"WebSocket connection failed: {ex.Message}");
-        }
+        await _webSocket.ConnectAsync(new Uri(_baseUrl), _cts.Token);
+        Debug.WriteLine($"WebSocket start");
+        await ReceiveLoopAsync();
+        Debug.WriteLine($"WebSocket end");
     }
 
     public async Task DisconnectAsync()
@@ -60,8 +53,7 @@ public class TaskWsService
                 message.Append(chunk);
             } while (!result.EndOfMessage);
             var m = message.ToString();
-            foreach (var e in OnMessageReceived)
-                e(m);
+            OnMessageReceived?.Invoke(m);
         }
     }
 }
